@@ -79,3 +79,39 @@ src/main/java/br/com/lefmachado/gasstationapi
 ├── entity/       # JPA @Entity mappings
 ├── dto/          # Request/Response records for API contracts
 └── exception/    # Global exception handling (@RestControllerAdvice)
+```
+
+---
+
+## 🚀 Implementation Roadmap
+
+- [x] Project scaffolding with Spring Initializr (Maven, Java 25, JPA, PostgreSQL, Lombok)
+- [x] PostgreSQL container setup (`db_posto`) with persistent named volume in `compose.yaml`
+- [x] Repository initialization, CI workflow, and documentation structure
+- [ ] Domain entities (`TipoCombustivel`, `BombaCombustivel`, `Abastecimento`) & Repositories
+- [ ] Fuel Types CRUD endpoints and service rules
+- [ ] Fuel Pumps CRUD endpoints linked to Fuel Types
+- [ ] Refuelings CRUD endpoints with automatic volume/amount calculation
+- [ ] Global exception handler & Bean Validation
+- [ ] Unit and integration tests
+
+---
+
+## 💻 Running the Project Locally
+
+### Prerequisites
+- **Java 25+**
+- **Docker** and **Docker Compose**
+
+### Steps
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/lefmachado/gas-station-api.git
+   cd gas-station-api
+   ```
+
+2. **Run the application:**
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+   > *Spring Boot automatically detects `compose.yaml`, starts the PostgreSQL container, creates the `db_posto` database, and configures the JDBC connection.*
