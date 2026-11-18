@@ -88,6 +88,7 @@ src/main/java/br/com/lefmachado/gasstationapi
 - [x] Project scaffolding with Spring Initializr (Maven, Java 25, JPA, PostgreSQL, Lombok)
 - [x] PostgreSQL container setup (`db_posto`) with persistent named volume in `compose.yaml`
 - [x] Repository initialization, CI workflow, and documentation structure
+- [x] Repository governance (`CONTRIBUTING.md`, `.editorconfig`, `CODEOWNERS`), GitHub templates, `CHANGELOG.md`, and initial ADRs (`docs/adr/`)
 - [ ] Domain entities (`TipoCombustivel`, `BombaCombustivel`, `Abastecimento`) & Repositories
 - [ ] Fuel Types CRUD endpoints and service rules
 - [ ] Fuel Pumps CRUD endpoints linked to Fuel Types

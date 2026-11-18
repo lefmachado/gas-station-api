@@ -1,0 +1,16 @@
+changelog:
+  categories:
+    - title: 🚀 Features
+      labels:
+        - enhancement
+    - title: 🧪 Tests
+      labels:
+        - test
+    - title: 🐛 Bug Fixes
+      labels:
+        - bug
+    - title: 🔧 Maintenance & Docs
+      labels:
+        - documentation
+        - dependencies
+        - "*"
