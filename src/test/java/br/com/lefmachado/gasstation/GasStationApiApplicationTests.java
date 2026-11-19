@@ -1,4 +1,4 @@
-package br.com.lefmachado.gas_station_api;
+package br.com.lefmachado.gasstation;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
