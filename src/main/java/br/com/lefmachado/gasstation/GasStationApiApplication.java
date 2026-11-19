@@ -1,4 +1,4 @@
-package br.com.lefmachado.gas_station_api;
+package br.com.lefmachado.gasstation;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
