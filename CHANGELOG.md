@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial Spring Boot project structure with Java 25, PostgreSQL 17 (`db_posto`) via Docker Compose, and GitHub Actions CI pipeline.
 - Repository governance files (`CONTRIBUTING.md`, `.editorconfig`, `CODEOWNERS`), GitHub templates (PR, Issues, Dependabot, Release Notes), and initial ADRs.
+- Formal requirements analysis, user needs, and BDD/Gherkin acceptance criteria in `docs/requirements.md`.
 - JPA domain entities (`FuelType`, `FuelPump`, `Refueling`) and Spring Data repositories (`FuelTypeRepository`, `FuelPumpRepository`, `RefuelingRepository`) under `br.com.lefmachado.gasstation` (#1).
 - Request and response DTO records (`FuelTypeRequest`, `FuelTypeResponse`) for fuel type API contracts (#2).
 - Business service layer (`FuelTypeService`) with duplicate name validation (`existsByNameIgnoreCase`, `existsByNameIgnoreCaseAndIdNot`) and pump dependency protection on deletion (#2).
@@ -18,5 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Business service layer (`FuelPumpService`) validating linked fuel type existence and protecting deletion when refuelings are registered (`existsByFuelPumpId`) (#3).
 - REST controller (`FuelPumpController`) exposing CRUD endpoints under `/api/v1/fuel-pumps` (#3).
 - Multi-phase architectural evolution roadmap in `README.md` covering microservices extraction, event-driven resilience, and zero-trust identity/security.
+- Request and response DTO records (`RefuelingRequest`, `RefuelingResponse`) for refueling API contracts (#4).
+- Business service layer (`RefuelingService`) with exact `BigDecimal` liters/amount calculation, exclusive input validation, and historical `appliedLiterPrice` snapshotting (#4).
+- REST controller (`RefuelingController`) exposing CRUD endpoints under `/api/v1/refuelings` (#4).
 
 [Unreleased]: https://github.com/lefmachado/gas-station-api/compare/main...develop

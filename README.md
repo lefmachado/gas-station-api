@@ -77,7 +77,7 @@ Develop a simple Java application for registering and querying refuelings at a g
 ### 2. Relational Database Modeling
 - **`fuel_types` (Fuel Types):** Stores `id`, unique `name`, and `liter_price` (`NUMERIC(10,3)`).
 - **`fuel_pumps` (Fuel Pumps):** Stores `id`, `name`, and a foreign key `fuel_type_id` referencing `fuel_types(id)`.
-- **`refuelings` (Refuelings):** Stores `id`, foreign key `fuel_pump_id`, `refueling_date`, `liters`, `total_amount`, and a snapshot of `applied_liter_price` at the exact time of refueling.
+- **`refuelings` (Refuelings):** Stores `id`, foreign key `fuel_pump_id`, `refueled_at`, `liters`, `total_amount`, and a snapshot of `applied_liter_price` at the exact time of refueling.
 
 ### 3. Layer Structure *(In Progress)*
 ```text
@@ -104,6 +104,11 @@ src/main/java/br/com/lefmachado/gasstation
 | **Fuel Pumps** | `GET` | `/api/v1/fuel-pumps/{id}` | Get a fuel pump by ID |
 | **Fuel Pumps** | `PUT` | `/api/v1/fuel-pumps/{id}` | Update an existing fuel pump |
 | **Fuel Pumps** | `DELETE` | `/api/v1/fuel-pumps/{id}` | Delete a fuel pump (if no refuelings exist) |
+| **Refuelings** | `POST` | `/api/v1/refuelings` | Register a refueling with automatic calculation and price snapshot |
+| **Refuelings** | `GET` | `/api/v1/refuelings` | List all registered refuelings |
+| **Refuelings** | `GET` | `/api/v1/refuelings/{id}` | Get a refueling record by ID |
+| **Refuelings** | `PUT` | `/api/v1/refuelings/{id}` | Update an existing refueling record |
+| **Refuelings** | `DELETE` | `/api/v1/refuelings/{id}` | Delete a refueling record |
 
 ---
 
@@ -118,7 +123,7 @@ src/main/java/br/com/lefmachado/gasstation
 - [x] Domain entities (`FuelType`, `FuelPump`, `Refueling`) & Repositories
 - [x] Fuel Types CRUD endpoints and service rules
 - [x] Fuel Pumps CRUD endpoints linked to Fuel Types
-- [ ] Refuelings CRUD endpoints with automatic volume/amount calculation
+- [x] Refuelings CRUD endpoints with automatic volume/amount calculation
 - [ ] Global exception handler & Bean Validation
 - [ ] Unit and integration tests
 
