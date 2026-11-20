@@ -14,5 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Request and response DTO records (`FuelTypeRequest`, `FuelTypeResponse`) for fuel type API contracts (#2).
 - Business service layer (`FuelTypeService`) with duplicate name validation (`existsByNameIgnoreCase`, `existsByNameIgnoreCaseAndIdNot`) and pump dependency protection on deletion (#2).
 - REST controller (`FuelTypeController`) exposing CRUD endpoints under `/api/v1/fuel-types` (#2).
+- Request and response DTO records (`FuelPumpRequest`, `FuelPumpResponse`) for fuel pump API contracts (#3).
+- Business service layer (`FuelPumpService`) validating linked fuel type existence and protecting deletion when refuelings are registered (`existsByFuelPumpId`) (#3).
+- REST controller (`FuelPumpController`) exposing CRUD endpoints under `/api/v1/fuel-pumps` (#3).
+- Multi-phase architectural evolution roadmap in `README.md` covering microservices extraction, event-driven resilience, and zero-trust identity/security.
 
 [Unreleased]: https://github.com/lefmachado/gas-station-api/compare/main...develop

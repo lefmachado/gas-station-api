@@ -90,21 +90,56 @@ src/main/java/br/com/lefmachado/gasstation
 | **Fuel Types** | `GET` | `/api/v1/fuel-types/{id}` | Get a fuel type by ID |
 | **Fuel Types** | `PUT` | `/api/v1/fuel-types/{id}` | Update an existing fuel type |
 | **Fuel Types** | `DELETE` | `/api/v1/fuel-types/{id}` | Delete a fuel type (if not linked to pumps) |
+| **Fuel Pumps** | `POST` | `/api/v1/fuel-pumps` | Register a new fuel pump linked to a fuel type |
+| **Fuel Pumps** | `GET` | `/api/v1/fuel-pumps` | List all registered fuel pumps |
+| **Fuel Pumps** | `GET` | `/api/v1/fuel-pumps/{id}` | Get a fuel pump by ID |
+| **Fuel Pumps** | `PUT` | `/api/v1/fuel-pumps/{id}` | Update an existing fuel pump |
+| **Fuel Pumps** | `DELETE` | `/api/v1/fuel-pumps/{id}` | Delete a fuel pump (if no refuelings exist) |
 
 ---
 
 ## 🚀 Implementation Roadmap
 
+### Phase 1: Modular Monolith (Core Challenge Scope)
 - [x] Project scaffolding with Spring Initializr (Maven, Java 25, JPA, PostgreSQL, Lombok)
 - [x] PostgreSQL container setup (`db_posto`) with persistent named volume in `compose.yaml`
 - [x] Repository initialization, CI workflow, and documentation structure
 - [x] Repository governance (`CONTRIBUTING.md`, `.editorconfig`, `CODEOWNERS`), GitHub templates, `CHANGELOG.md`, and initial ADRs (`docs/adr/`)
 - [x] Domain entities (`FuelType`, `FuelPump`, `Refueling`) & Repositories
 - [x] Fuel Types CRUD endpoints and service rules
-- [ ] Fuel Pumps CRUD endpoints linked to Fuel Types
+- [x] Fuel Pumps CRUD endpoints linked to Fuel Types
 - [ ] Refuelings CRUD endpoints with automatic volume/amount calculation
 - [ ] Global exception handler & Bean Validation
 - [ ] Unit and integration tests
+
+### Phase 2: Distributed Architecture & Microservices Evolution *(Post-Monolith Simulation)*
+> Simulates scaling the system for a national network of gas stations and digital totems requiring high-throughput fuel price lookups without scaling the administrative module.
+
+- [ ] Extract `pricing-service` as an independent Spring Boot microservice with its own PostgreSQL database (`db_pricing`) and `fuel_prices` table (*Database-per-Service* pattern)
+- [ ] Add distributed caching (Redis) in `pricing-service` to serve high-concurrency price queries from digital totems and pumps
+- [ ] Refactor `gas-station-api` monolith to remove the local `FuelType` entity/table, replacing `@ManyToOne` in `FuelPump` with a logical reference (`Long fuelTypeId`)
+- [ ] Implement `PricingClient` using Spring `RestClient` in `gas-station-api` to fetch current fuel prices over HTTP during refueling registration
+- [ ] Add synchronous resilience patterns (Circuit Breaker / Retry / Fallback) on HTTP calls between `gas-station-api` and `pricing-service`
+- [ ] Orchestrate the multi-service environment (`gas-station-api`, `pricing-service`, `db_posto`, `db_pricing`, Redis) via Docker Compose
+
+### Phase 3: Event-Driven Resilience & Fault Tolerance *(Outage Simulation)*
+> Simulates network partitions and `pricing-service` outages, eliminating synchronous runtime dependencies during refueling via asynchronous messaging and local read-model replication.
+
+- [ ] Add RabbitMQ broker (`rabbitmq:4-management`) to `compose.yaml` with durable Topic Exchanges, retry policies, and Dead Letter Queues (DLQ)
+- [ ] Implement the Transactional Outbox Pattern in `pricing-service` (`outbox_events` table + scheduled relay) to guarantee atomic event publishing on price changes
+- [ ] Implement idempotent RabbitMQ consumer in `gas-station-api` (`processed_events` + `replicated_fuel_prices` local read model)
+- [ ] Refactor `RefuelingService` to read prices from the local replicated table instead of synchronous HTTP calls, keeping refueling operational even when `pricing-service` is offline
+- [ ] Simulate `pricing-service` outage (`docker stop`) and validate zero-downtime refueling, queued event replay upon recovery, and DLQ handling with Testcontainers
+
+### Phase 4: API Governance, Identity & Zero-Trust Security *(Access Control & Hardening Simulation)*
+> Simulates multi-role station operations and machine-to-machine totem integrations, enforcing federated identity, Segregation of Duties (SoD), and least-privilege hardening across REST APIs and message brokers.
+
+- [ ] Standardize API governance with OpenAPI 3 (`springdoc-openapi`) contracts, non-breaking URI versioning (`/api/v2/prices` expand-and-contract), and explicit `schemaVersion` envelopes on RabbitMQ events
+- [ ] Add Keycloak Identity Provider to `compose.yaml` supporting OIDC + Authorization Code with PKCE (operators/managers) and OAuth 2.0 Client Credentials (`SCOPE_prices:read` for digital totems)
+- [ ] Configure `pricing-service` and `gas-station-api` as stateless Spring Security OAuth2 Resource Servers validating asymmetric `RS256` JWTs via JWKS (`iss`, `aud`, and short-lived `exp` claims)
+- [ ] Enforce Segregation of Duties (SoD) and defense-in-depth (`SecurityFilterChain` + `@PreAuthorize`) across `ROLE_PRICING_ADMIN`, `ROLE_ATTENDANT`, `ROLE_STATION_MANAGER`, and `ROLE_OPS_ADMIN`
+- [ ] Prevent BOLA/IDOR vulnerabilities by validating branch ownership (`station_id` JWT claim) on pump and refueling operations, and lock down `/actuator/**` endpoints under a deny-by-default policy
+- [ ] Harden RabbitMQ with least-privilege service accounts (`pricing_publisher` write-only on exchange; `gas_station_consumer` read-only on queue) and propagate immutable audit claims (`triggeredBySub`, `correlationId`) without passing expiring JWTs in messages
 
 ---
 
