@@ -10,6 +10,15 @@
 
 ---
 
+## 📚 Project Documentation
+
+- **[Requirements & Problem Analysis](docs/requirements.md):** User needs, personas, functional/non-functional requirements (FR/NFR), constraints, workflow analysis (*As-Is* $\rightarrow$ *To-Be*), and BDD/Gherkin acceptance criteria.
+- **[Architecture Decision Records (ADRs)](docs/adr/):** Documented technical and architectural choices made across the project lifecycle.
+- **[Changelog](CHANGELOG.md):** Chronological log of notable changes per release and issue.
+- **[Contributing Guidelines](CONTRIBUTING.md):** Branching strategy, commit conventions, and PR workflow.
+
+---
+
 ## 📄 Original Challenge Specification
 
 ### Junior Technical Challenge #1 – Refueling Registration and Query
@@ -105,6 +114,7 @@ src/main/java/br/com/lefmachado/gasstation
 - [x] PostgreSQL container setup (`db_posto`) with persistent named volume in `compose.yaml`
 - [x] Repository initialization, CI workflow, and documentation structure
 - [x] Repository governance (`CONTRIBUTING.md`, `.editorconfig`, `CODEOWNERS`), GitHub templates, `CHANGELOG.md`, and initial ADRs (`docs/adr/`)
+- [x] Formal requirements analysis, user needs, and BDD acceptance criteria ([`docs/requirements.md`](docs/requirements.md))
 - [x] Domain entities (`FuelType`, `FuelPump`, `Refueling`) & Repositories
 - [x] Fuel Types CRUD endpoints and service rules
 - [x] Fuel Pumps CRUD endpoints linked to Fuel Types
