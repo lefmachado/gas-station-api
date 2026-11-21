@@ -22,5 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Request and response DTO records (`RefuelingRequest`, `RefuelingResponse`) for refueling API contracts (#4).
 - Business service layer (`RefuelingService`) with exact `BigDecimal` liters/amount calculation, exclusive input validation, and historical `appliedLiterPrice` snapshotting (#4).
 - REST controller (`RefuelingController`) exposing CRUD endpoints under `/api/v1/refuelings` (#4).
+- Bean Validation (`spring-boot-starter-validation`) on request DTOs (`FuelTypeRequest`, `FuelPumpRequest`, `RefuelingRequest`) and `@Valid` enforcement across all REST controllers (#5).
+- Global exception handler (`GlobalExceptionHandler` with `@RestControllerAdvice`) returning standardized RFC 7807 `ProblemDetail` payloads for validation, HTTP status, malformed JSON, type mismatch, and unexpected errors (#5).
 
 [Unreleased]: https://github.com/lefmachado/gas-station-api/compare/main...develop
