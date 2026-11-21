@@ -3,6 +3,7 @@ package br.com.lefmachado.gasstation.controller;
 import br.com.lefmachado.gasstation.dto.FuelPumpRequest;
 import br.com.lefmachado.gasstation.dto.FuelPumpResponse;
 import br.com.lefmachado.gasstation.service.FuelPumpService;
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class FuelPumpController {
     private final FuelPumpService fuelPumpService;
 
     @PostMapping
-    public ResponseEntity<FuelPumpResponse> create(@RequestBody FuelPumpRequest request) {
+    public ResponseEntity<FuelPumpResponse> create(@Valid @RequestBody FuelPumpRequest request) {
         FuelPumpResponse created = fuelPumpService.create(request);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -48,7 +49,7 @@ public class FuelPumpController {
     @PutMapping("/{id}")
     public ResponseEntity<FuelPumpResponse> update(
             @PathVariable Long id,
-            @RequestBody FuelPumpRequest request) {
+            @Valid @RequestBody FuelPumpRequest request) {
         return ResponseEntity.ok(fuelPumpService.update(id, request));
     }
 

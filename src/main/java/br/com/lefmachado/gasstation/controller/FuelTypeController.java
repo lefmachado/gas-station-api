@@ -3,6 +3,7 @@ package br.com.lefmachado.gasstation.controller;
 import br.com.lefmachado.gasstation.dto.FuelTypeRequest;
 import br.com.lefmachado.gasstation.dto.FuelTypeResponse;
 import br.com.lefmachado.gasstation.service.FuelTypeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,7 +27,8 @@ public class FuelTypeController {
     private final FuelTypeService fuelTypeService;
 
     @PostMapping
-    public ResponseEntity<FuelTypeResponse> create(@RequestBody FuelTypeRequest request) {
+
+    public ResponseEntity<FuelTypeResponse> create(@Valid @RequestBody FuelTypeRequest request) {
         FuelTypeResponse created = fuelTypeService.create(request);
 
         URI location = ServletUriComponentsBuilder
@@ -51,7 +53,7 @@ public class FuelTypeController {
     @PutMapping("/{id}")
     public ResponseEntity<FuelTypeResponse> update(
             @PathVariable Long id,
-            @RequestBody FuelTypeRequest request) {
+            @Valid @RequestBody FuelTypeRequest request) {
         return ResponseEntity.ok(fuelTypeService.update(id, request));
     }
 

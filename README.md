@@ -87,7 +87,7 @@ src/main/java/br/com/lefmachado/gasstation
 ├── repository/   # Spring Data JPA interfaces
 ├── entity/       # JPA @Entity mappings
 ├── dto/          # Request/Response records for API contracts
-└── exception/    # Global exception handling (@RestControllerAdvice) - Planned
+└── exception/    # Global exception handling (@RestControllerAdvice + RFC 7807 ProblemDetail)
 ```
 
 ### 4. Implemented REST Endpoints
@@ -124,7 +124,7 @@ src/main/java/br/com/lefmachado/gasstation
 - [x] Fuel Types CRUD endpoints and service rules
 - [x] Fuel Pumps CRUD endpoints linked to Fuel Types
 - [x] Refuelings CRUD endpoints with automatic volume/amount calculation
-- [ ] Global exception handler & Bean Validation
+- [x] Global exception handler & Bean Validation
 - [ ] Versioned database schema migrations with Flyway (`src/main/resources/db/migration`), replacing Hibernate `ddl-auto`
 - [ ] Unit and integration tests
 
