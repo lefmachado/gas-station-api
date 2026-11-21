@@ -125,7 +125,7 @@ src/main/java/br/com/lefmachado/gasstation
 - [x] Fuel Pumps CRUD endpoints linked to Fuel Types
 - [x] Refuelings CRUD endpoints with automatic volume/amount calculation
 - [x] Global exception handler & Bean Validation
-- [ ] Versioned database schema migrations with Flyway (`src/main/resources/db/migration`), replacing Hibernate `ddl-auto`
+- [x] Versioned database schema migrations with Flyway (`src/main/resources/db/migration`), replacing Hibernate `ddl-auto`
 - [ ] Unit and integration tests
 
 ### Phase 2: Distributed Architecture & Microservices Evolution *(Post-Monolith Simulation)*
