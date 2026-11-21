@@ -3,10 +3,12 @@
 ![Java](https://img.shields.io/badge/Java-25-orange?style=flat-square&logo=openjdk)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen?style=flat-square&logo=springboot)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-blue?style=flat-square&logo=postgresql)
+![Flyway](https://img.shields.io/badge/Flyway-Migrations-CC0200?style=flat-square&logo=flyway)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker)
-![Status](https://img.shields.io/badge/Status-Work%20in%20Progress-yellow?style=flat-square)
+![Release](https://img.shields.io/badge/Release-v1.0.0-brightgreen?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Phase%201%20Complete-success?style=flat-square)
 
-> 🚧 **Development Status:** This project is currently under active development. The sections below contain the full original challenge specification followed by the architectural decisions, database modeling, and implementation progress.
+> ✅ **Development Status (`v1.0.0`):** **Phase 1 (Modular Monolith)** is complete, including full CRUD REST APIs, Flyway versioned migrations, Bean Validation, RFC 7807 error handling, and automated unit/integration tests. Phases 2–5 are documented below as the architectural evolution roadmap.
 
 ---
 
@@ -79,7 +81,7 @@ Develop a simple Java application for registering and querying refuelings at a g
 - **`fuel_pumps` (Fuel Pumps):** Stores `id`, `name`, and a foreign key `fuel_type_id` referencing `fuel_types(id)`.
 - **`refuelings` (Refuelings):** Stores `id`, foreign key `fuel_pump_id`, `refueled_at`, `liters`, `total_amount`, and a snapshot of `applied_liter_price` at the exact time of refueling.
 
-### 3. Layer Structure *(In Progress)*
+### 3. Layer Structure
 ```text
 src/main/java/br/com/lefmachado/gasstation
 ├── controller/   # REST endpoints (GET, POST, PUT, DELETE)
