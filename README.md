@@ -126,7 +126,7 @@ src/main/java/br/com/lefmachado/gasstation
 - [x] Refuelings CRUD endpoints with automatic volume/amount calculation
 - [x] Global exception handler & Bean Validation
 - [x] Versioned database schema migrations with Flyway (`src/main/resources/db/migration`), replacing Hibernate `ddl-auto`
-- [ ] Unit and integration tests
+- [x] Unit and integration tests
 
 ### Phase 2: Distributed Architecture & Microservices Evolution *(Post-Monolith Simulation)*
 > Simulates scaling the system for a national network of gas stations and digital totems requiring high-throughput fuel price lookups without scaling the administrative module.
