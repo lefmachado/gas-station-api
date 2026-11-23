@@ -73,7 +73,7 @@ Develop a simple Java application for registering and querying refuelings at a g
 - **Java 25 & Spring Boot:** Core backend framework providing embedded web server, dependency injection, and auto-configuration.
 - **Spring Data JPA & Hibernate:** Object-Relational Mapping (ORM) and repository abstraction.
 - **PostgreSQL 17:** Relational database (`db_gas_station`) chosen to enforce native foreign key integrity (`1:N` relationships) and financial precision.
-- **Docker & Spring Boot Docker Compose:** Automated container lifecycle management with isolated named volumes (`postgres_gas_station_data`, `postgres_pricing_data`) so data persists across application restarts.
+- **Docker & Docker Compose:** Containerized infrastructure (`postgres-gas-station` / `db_gas_station` and `postgres-pricing` / `db_pricing`) with isolated named volumes (`postgres_gas_station_data`, `postgres_pricing_data`) so data persists across restarts.
 - **Lombok & Maven:** Boilerplate reduction and dependency/build management.
 
 ### 2. Relational Database Modeling
@@ -83,12 +83,20 @@ Develop a simple Java application for registering and querying refuelings at a g
 
 ### 3. Layer Structure
 ```text
-src/main/java/br/com/lefmachado/gasstation
+gas-station-service/src/main/java/br/com/lefmachado/gasstation
 ├── controller/   # REST endpoints (GET, POST, PUT, DELETE)
 ├── service/      # Business rules (automatic liters/total value calculation & validations)
 ├── repository/   # Spring Data JPA interfaces
 ├── entity/       # JPA @Entity mappings
 ├── dto/          # Request/Response records for API contracts
+└── exception/    # Global exception handling (@RestControllerAdvice + RFC 7807 ProblemDetail)
+
+pricing-service/src/main/java/br/com/lefmachado/pricing
+├── controller/   # REST endpoints (/api/v1/prices)
+├── service/      # Pricing business rules & duplicate validation
+├── repository/   # Spring Data JPA interfaces
+├── entity/       # JPA @Entity mapping (FuelPrice)
+├── dto/          # Request/Response records with Bean Validation
 └── exception/    # Global exception handling (@RestControllerAdvice + RFC 7807 ProblemDetail)
 ```
 
@@ -259,12 +267,31 @@ Instead of a static chatbot, the service acts as a routing agent deciding whethe
 ### Steps
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/lefmachado/gas-station-api.git](https://github.com/lefmachado/gas-station-api.git)
+   git clone https://github.com/lefmachado/gas-station-api.git
    cd gas-station-api
    ```
 
-2. **Run the application:**
+2. **Start the PostgreSQL databases (`db_gas_station` on `:5432` and `db_pricing` on `:5433`):**
    ```bash
+   docker compose up -d
+   ```
+
+3. **Run the microservices (in separate terminals):**
+   ```bash
+   # Terminal 1 — Gas Station Service (port 8080)
+   cd gas-station-service
+   ./mvnw spring-boot:run
+
+   # Terminal 2 — Pricing Service (port 8081)
+   cd pricing-service
    ./mvnw spring-boot:run
    ```
-   > *Spring Boot automatically detects `compose.yaml`, starts the PostgreSQL container, creates the `db_gas_station` database, and configures the JDBC connection.*
+
+### Running Automated Tests
+```bash
+# Gas Station Service (25 unit & integration tests)
+(cd gas-station-service && ./mvnw clean verify)
+
+# Pricing Service (9 unit & integration tests)
+(cd pricing-service && ./mvnw clean verify)
+```
