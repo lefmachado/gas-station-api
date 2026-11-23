@@ -20,9 +20,30 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
+          cache-dependency-path: '**/pom.xml'
 
-      - name: Grant execute permission for Maven Wrapper
-        run: chmod +x mvnw
+      - name: Grant execute permission for Maven Wrappers
+        run: chmod +x gas-station-service/mvnw pricing-service/mvnw
 
-      - name: Build and run tests
+      - name: Start PostgreSQL databases (db_gas_station & db_pricing)
+        run: |
+          docker compose up -d postgres-gas-station postgres-pricing
+          for i in $(seq 1 30); do
+            if docker compose exec -T postgres-gas-station pg_isready -U postgres -d db_gas_station \
+               && docker compose exec -T postgres-pricing pg_isready -U postgres -d db_pricing; then
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Build and test gas-station-service
+        working-directory: gas-station-service
         run: ./mvnw clean verify
+
+      - name: Build and test pricing-service
+        working-directory: pricing-service
+        run: ./mvnw clean verify
+
+      - name: Tear down Docker Compose services
+        if: always()
+        run: docker compose down

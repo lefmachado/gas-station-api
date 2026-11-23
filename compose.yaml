@@ -1,14 +1,26 @@
 services:
-  postgres:
+  postgres-gas-station:
     image: 'postgres:17-alpine'
     environment:
-      - 'POSTGRES_DB=db_posto'
+      - 'POSTGRES_DB=db_gas_station'
       - 'POSTGRES_PASSWORD=postgres'
       - 'POSTGRES_USER=postgres'
     ports:
-      - '5432'
+      - '5432:5432'
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_gas_station_data:/var/lib/postgresql/data
+
+  postgres-pricing:
+    image: 'postgres:17-alpine'
+    environment:
+      - 'POSTGRES_DB=db_pricing'
+      - 'POSTGRES_PASSWORD=postgres'
+      - 'POSTGRES_USER=postgres'
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_pricing_data:/var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  postgres_gas_station_data:
+  postgres_pricing_data:
