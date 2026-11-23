@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Reorganized repository into a symmetric multi-service monorepo (`gas-station-service/` + `pricing-service/`) with shared root `compose.yaml`, `docs/`, Dependabot, and multi-service CI workflow (#23).
+- Extracted `pricing-service` microservice (`pricing-service/`) with Java 25, Spring Boot 4.1+, isolated PostgreSQL 17 database (`db_pricing` on port `5433` via `compose.yaml`), Flyway migration (`V1__create_fuel_prices_table.sql`), `/api/v1/prices` CRUD endpoints, RFC 7807 `ProblemDetail` error handling, and unit/integration tests (#23).
+
 ## [1.0.0] - 2026-11-21
 
 ### Added

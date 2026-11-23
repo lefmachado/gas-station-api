@@ -72,8 +72,8 @@ Develop a simple Java application for registering and querying refuelings at a g
 ### 1. Tech Stack & Architecture
 - **Java 25 & Spring Boot:** Core backend framework providing embedded web server, dependency injection, and auto-configuration.
 - **Spring Data JPA & Hibernate:** Object-Relational Mapping (ORM) and repository abstraction.
-- **PostgreSQL 17:** Relational database (`db_posto`) chosen to enforce native foreign key integrity (`1:N` relationships) and financial precision.
-- **Docker & Spring Boot Docker Compose:** Automated container lifecycle management with named volumes (`postgres_data`) so data persists across application restarts.
+- **PostgreSQL 17:** Relational database (`db_gas_station`) chosen to enforce native foreign key integrity (`1:N` relationships) and financial precision.
+- **Docker & Docker Compose:** Containerized infrastructure (`postgres-gas-station` / `db_gas_station` and `postgres-pricing` / `db_pricing`) with isolated named volumes (`postgres_gas_station_data`, `postgres_pricing_data`) so data persists across restarts.
 - **Lombok & Maven:** Boilerplate reduction and dependency/build management.
 
 ### 2. Relational Database Modeling
@@ -83,12 +83,20 @@ Develop a simple Java application for registering and querying refuelings at a g
 
 ### 3. Layer Structure
 ```text
-src/main/java/br/com/lefmachado/gasstation
+gas-station-service/src/main/java/br/com/lefmachado/gasstation
 ├── controller/   # REST endpoints (GET, POST, PUT, DELETE)
 ├── service/      # Business rules (automatic liters/total value calculation & validations)
 ├── repository/   # Spring Data JPA interfaces
 ├── entity/       # JPA @Entity mappings
 ├── dto/          # Request/Response records for API contracts
+└── exception/    # Global exception handling (@RestControllerAdvice + RFC 7807 ProblemDetail)
+
+pricing-service/src/main/java/br/com/lefmachado/pricing
+├── controller/   # REST endpoints (/api/v1/prices)
+├── service/      # Pricing business rules & duplicate validation
+├── repository/   # Spring Data JPA interfaces
+├── entity/       # JPA @Entity mapping (FuelPrice)
+├── dto/          # Request/Response records with Bean Validation
 └── exception/    # Global exception handling (@RestControllerAdvice + RFC 7807 ProblemDetail)
 ```
 
@@ -118,7 +126,7 @@ src/main/java/br/com/lefmachado/gasstation
 
 ### Phase 1: Modular Monolith (Core Challenge Scope)
 - [x] Project scaffolding with Spring Initializr (Maven, Java 25, JPA, PostgreSQL, Lombok)
-- [x] PostgreSQL container setup (`db_posto`) with persistent named volume in `compose.yaml`
+- [x] PostgreSQL container setup (`db_gas_station`) with persistent named volume in `compose.yaml`
 - [x] Repository initialization, CI workflow, and documentation structure
 - [x] Repository governance (`CONTRIBUTING.md`, `.editorconfig`, `CODEOWNERS`), GitHub templates, `CHANGELOG.md`, and initial ADRs (`docs/adr/`)
 - [x] Formal requirements analysis, user needs, and BDD acceptance criteria ([`docs/requirements.md`](docs/requirements.md))
@@ -133,12 +141,12 @@ src/main/java/br/com/lefmachado/gasstation
 ### Phase 2: Distributed Architecture & Microservices Evolution *(Post-Monolith Simulation)*
 > Simulates scaling the system for a national network of gas stations and digital totems requiring high-throughput fuel price lookups without scaling the administrative module.
 
-- [ ] Extract `pricing-service` as an independent Spring Boot microservice with its own PostgreSQL database (`db_pricing`), Flyway migrations, and `fuel_prices` table (*Database-per-Service* pattern)
+- [x] Extract `pricing-service` as an independent Spring Boot microservice with its own PostgreSQL database (`db_pricing`), Flyway migrations, and `fuel_prices` table (*Database-per-Service* pattern)
 - [ ] Add distributed caching (Redis) in `pricing-service` to serve high-concurrency price queries from digital totems and pumps, and benchmark `p95`/`p99` latency with and without Redis using k6 / JMeter
 - [ ] Refactor `gas-station-api` monolith to remove the local `FuelType` entity/table, replacing `@ManyToOne` in `FuelPump` with a logical reference (`Long fuelTypeId`)
 - [ ] Implement `PricingClient` using Spring `RestClient` in `gas-station-api` to fetch current fuel prices over HTTP during refueling registration
 - [ ] Add synchronous resilience patterns (Resilience4j Circuit Breaker / Retry / Fallback) on HTTP calls between `gas-station-api` and `pricing-service`, plus HTTP `Idempotency-Key` header support on `POST /api/v1/refuelings` to prevent duplicate refueling charges on client retries
-- [ ] Orchestrate the multi-service environment (`gas-station-api`, `pricing-service`, `db_posto`, `db_pricing`, Redis) with multi-stage `Dockerfile`s, `compose.yaml`, and reference Kubernetes manifests (`k8s/` Deployment, HPA, Liveness/Readiness Probes)
+- [ ] Orchestrate the multi-service environment (`gas-station-api`, `pricing-service`, `db_gas_station`, `db_pricing`, Redis) with multi-stage `Dockerfile`s, `compose.yaml`, and reference Kubernetes manifests (`k8s/` Deployment, HPA, Liveness/Readiness Probes)
 
 ### Phase 3: Event-Driven Resilience, Observability & Fault Tolerance *(Outage Simulation)*
 > Simulates network partitions and `pricing-service` outages, eliminating synchronous runtime dependencies during refueling via asynchronous messaging, local read-model replication, and full-stack observability.
@@ -179,7 +187,7 @@ This section serves as an implementation blueprint mapping distributed systems c
 - **Messaging, Events & Persistence (3.1):**
   - **RabbitMQ** with durable Topic Exchanges (`pricing.events`), bounded retry queues, and Dead Letter Queues (`pricing.events.dlq`).
   - **Transactional Outbox Pattern:** `pricing-service` persists domain updates (`fuel_prices`) and outbox records (`outbox_events`) in the same local ACID transaction; an asynchronous relay publishes pending events to RabbitMQ, avoiding dual-write inconsistencies.
-  - **Local Read-Model Replication:** `gas-station-api` consumes `FuelPriceUpdatedEvent` messages into a local `replicated_fuel_prices` table inside `db_posto`.
+  - **Local Read-Model Replication:** `gas-station-api` consumes `FuelPriceUpdatedEvent` messages into a local `replicated_fuel_prices` table inside `db_gas_station`.
 - **Failures, Retries, Idempotency & Consistency (3.2):**
   - **HTTP Layer Idempotency:** `POST /api/v1/refuelings` accepts an `Idempotency-Key` request header persisted with a unique constraint and response snapshot so client/network retries never duplicate refueling transactions.
   - **Messaging Idempotency:** Event consumers record `eventId` in a `processed_events` table before applying updates to `replicated_fuel_prices`, making message redelivery (`at-least-once`) safe and idempotent.
@@ -188,7 +196,7 @@ This section serves as an implementation blueprint mapping distributed systems c
   - **Phase 2 (Synchronous Request/Response):** `gas-station-api` coordinates price lookups via `RestClient` against `pricing-service`.
   - **Phase 3 (Asynchronous Event Choreography):** Decouples forecourt operations from `pricing-service` availability by shifting to event-driven choreography via RabbitMQ.
 - **Contract Evolution & Schema Migration (3.4):**
-  - **Database Migrations:** Managed via **Flyway** (`src/main/resources/db/migration/V*__*.sql`) using the *expand-and-contract* pattern for zero-downtime schema changes across `db_posto` and `db_pricing`.
+  - **Database Migrations:** Managed via **Flyway** (`src/main/resources/db/migration/V*__*.sql`) using the *expand-and-contract* pattern for zero-downtime schema changes across `db_gas_station` and `db_pricing`.
   - **REST & Event Contracts:** Documented with OpenAPI 3 (`springdoc-openapi`), non-breaking URI versioning (`/api/v1/prices` $\rightarrow$ `/api/v2/prices`), and explicit `schemaVersion` metadata inside RabbitMQ JSON payloads.
 
 ### 2. Application Reliability & Observability
@@ -204,7 +212,7 @@ This section serves as an implementation blueprint mapping distributed systems c
   - **Low-Latency Caching:** Redis cache-aside in `pricing-service` serving digital totem queries in sub-millisecond latency.
   - **Capacity & Load Testing:** Automated **k6** scripts benchmarking `p95`/`p99` latency and throughput (RPS) with and without Redis and under downstream latency injection.
 - **Integration & Dependency Diagnostics (5.4):**
-  - **Spring Boot Actuator Health Probes:** `/actuator/health/liveness` and `/actuator/health/readiness` backed by health indicators for PostgreSQL (`db_posto` / `db_pricing`), Redis, and RabbitMQ.
+  - **Spring Boot Actuator Health Probes:** `/actuator/health/liveness` and `/actuator/health/readiness` backed by health indicators for PostgreSQL (`db_gas_station` / `db_pricing`), Redis, and RabbitMQ.
   - **Dependency Latency Breakdown:** OpenTelemetry spans isolating JDBC query duration, Redis cache hits/misses, and RabbitMQ publish/consume latency.
 - **Service Continuity, Recovery & Graceful Degradation (5.5):**
   - **Zero-Downtime Outage Handling:** If `pricing-service` is stopped (`docker stop pricing-service`), `gas-station-api` degrades gracefully by reading from `replicated_fuel_prices` so forecourt pumps never stop registering refuelings.
@@ -259,12 +267,31 @@ Instead of a static chatbot, the service acts as a routing agent deciding whethe
 ### Steps
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/lefmachado/gas-station-api.git](https://github.com/lefmachado/gas-station-api.git)
+   git clone https://github.com/lefmachado/gas-station-api.git
    cd gas-station-api
    ```
 
-2. **Run the application:**
+2. **Start the PostgreSQL databases (`db_gas_station` on `:5432` and `db_pricing` on `:5433`):**
    ```bash
+   docker compose up -d
+   ```
+
+3. **Run the microservices (in separate terminals):**
+   ```bash
+   # Terminal 1 — Gas Station Service (port 8080)
+   cd gas-station-service
+   ./mvnw spring-boot:run
+
+   # Terminal 2 — Pricing Service (port 8081)
+   cd pricing-service
    ./mvnw spring-boot:run
    ```
-   > *Spring Boot automatically detects `compose.yaml`, starts the PostgreSQL container, creates the `db_posto` database, and configures the JDBC connection.*
+
+### Running Automated Tests
+```bash
+# Gas Station Service (25 unit & integration tests)
+(cd gas-station-service && ./mvnw clean verify)
+
+# Pricing Service (9 unit & integration tests)
+(cd pricing-service && ./mvnw clean verify)
+```
